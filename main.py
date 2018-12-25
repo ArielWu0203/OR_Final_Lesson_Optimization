@@ -3,6 +3,7 @@ import pulp
 import random
 import re
 import utils
+import uuid
 
 # define constant
 grade = 4
@@ -10,6 +11,7 @@ semester = 1
 lesson_number = [27, 36, 164] # required, elective, general
 min_credit = 16
 max_credit = 25
+ratio = [0.5, 0.5, 0.5] # time, love, easy
 
 # import all electives
 wb = openpyxl.load_workbook("OR_sheets.xlsx")
@@ -36,7 +38,7 @@ def config_required_lesson(grade, semester, time_table, current_credit):
 
 def get_available_lesson(grade, semester, time_table, lesson_type):
 	# get specified lesson
-	lessons = []
+	lessons = {}
 	# sort out all lesson
 	for row in range(2, lesson_number[lesson_type]):
 		lesson = elective_sheet[row]
@@ -52,36 +54,202 @@ def get_available_lesson(grade, semester, time_table, lesson_type):
 		if flag:
 			continue
 		target_lesson = {
-			"type": 1,
+			"type": lesson_type,
+			"grade": grade,
+			"semester": semester,
 			"name": lesson[0].value,
 			"time": utils.parse_time(lesson[3].value),
 			"love": random.randint(0, 10),
-			"easy": random.randint(0, 10)
+			"easy": random.randint(0, 10),
+			"credit": lesson[2].value
 			}
-		lessons.append(target_lesson)
+		lessons[str(uuid.uuid1())] = target_lesson
 
 	return lessons
 
+def get_time_prefer_table(grade, semester, time_table):
+	time = time_prefer_sheet[grade * semester + 1]
+	for i in range(1, 11):
+		if i % 2 == 0:
+			continue
+		for j in range(0, 5):
+			time_table[str(int(i / 2) + 1)][j] = time[i].value
+		for j in range(5, 15):
+			time_table[str(int(i / 2) + 1)][j] = time[i + 1].value
+	return time_table
+
 def main():
+	# define lesson table
+	time_lesson_table = {
+		"1+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"1-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"2+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"2-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"3+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"3-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"4+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"4-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+
+	}
+	# define lesson table
+	time_prefer_table = {
+		"1+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"1-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"2+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"2-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"3+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"3-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+		"4+": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
+		},
+		"4-": {
+			"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
+			"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
+			"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
+			"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
+			"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday	
+		},
+
+	}
+	# define available lesson list
+	available_lessons = {}
+
+	# define current credit
+	current_credit = 0
 	for grade in range(1, 5):
 		for semester in range(1, 3):
-			# define current credit
-			current_credit = 0
-			# define time table
-			time_table = {
-				"1": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Monday
-				"2": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Tuesday
-				"3": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Wednesday
-				"4": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0], # Thursday
-				"5": [0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0] # Friday
-				}
-			config_required_lesson(grade, semester, time_table, current_credit)
+			config_required_lesson(grade, semester, time_lesson_table["{}{}".format(grade, '+' if semester == 1 else '-')], current_credit)
 			print("{} - {}".format(grade, semester))
-			print(time_table)
-			available_lessons = get_available_lesson(grade, semester, time_table, 1)
-			print(available_lessons)
-			# TODO: use pulp to solve optimize solution for elevtive lesson
-			# TODO: use pulp to solve optimize solution for general lesson
-			# export result time table
+			get_time_prefer_table(grade, semester, time_prefer_table["{}{}".format(grade, '+' if semester == 1 else '-')])
+			available_lessons.update(get_available_lesson(grade, semester, time_lesson_table["{}{}".format(grade, '+' if semester == 1 else '-')], 1))
+	print("Time Lesson Table")
+	print(time_lesson_table)
+	print("Time Prefer Table")
+	print(time_prefer_table)
+	print("All Avaliable Elective Lesson")
+	print(available_lessons)
+	# TODO: use pulp to solve optimize solution for elevtive lesson
+	problem = pulp.LpProblem("Choosing Lesson", pulp.LpMaximize)
+	# define all available lessons to optimization variable
+	names = [key for key in available_lessons]
+	lesson_variables = pulp.LpVariable.dict('x', names, lowBound=0, cat="Binary")
 
+	# config object expression
+	problem += pulp.lpSum(
+			[time_prefer_table["{}{}".format(available_lessons[key]["grade"], '+' if available_lessons[key]["semester"] == 1 else '-')][str(time["day"])][time["period"][0]] * ratio[0] * lesson_variables[key] for time in available_lessons[key]["time"]] + 
+			available_lessons[key]["love"] * ratio[1] * lesson_variables[key] + 
+			available_lessons[key]["easy"] * ratio[2] * lesson_variables[key]
+			for key in lesson_variables
+			)
+	# config basic restricted expression
+	problem += pulp.LpAffineExpression(
+			(available_lessons[key]["credit"], lesson_variables[key])
+			for key in lesson_variables
+			) >= 36
+	problem += pulp.LpAffineExpression(
+			(available_lessons[key]["love"], lesson_variables[key])
+			for key in lesson_variables
+			) >= 20
+	problem += pulp.LpAffineExpression(
+			(available_lessons[key]["easy"], lesson_variables[key])
+			for key in lesson_variables
+			) >= 20
+	# config same time lesson restricted expression
+	overlap = utils.find_same_time_lesson(available_lessons)
+	print("Overlap lesson")
+	print(overlap)
+	for target in overlap:
+		for i in target:
+			print(available_lessons[i])
+		print("")
+	# TODO: use pulp to solve optimize solution for general lesson
+	# export result time table
 main()
