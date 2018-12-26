@@ -11,7 +11,7 @@ semester = 1
 lesson_number = [27, 36, 164] # required, elective, general
 min_credit = 16
 max_credit = 25
-ratio = [0.5, 0.5, 0.5] # time, love, easy
+ratio = [0.1, 0.7, 0.2] # time, love, easy
 
 # import all electives
 wb = openpyxl.load_workbook("OR_sheets.xlsx")
@@ -59,8 +59,8 @@ def get_available_lesson(grade, semester, time_table, lesson_type):
 			"semester": semester,
 			"name": lesson[0].value,
 			"time": utils.parse_time(lesson[3].value),
-			"love": random.randint(0, 10),
-			"easy": random.randint(0, 10),
+			"love": lesson[4].value,
+			"easy": lesson[5].value,
 			"credit": lesson[2].value
 			}
 		lessons[str(uuid.uuid1())] = target_lesson
@@ -231,25 +231,32 @@ def main():
 			)
 	# config basic restricted expression
 	problem += pulp.LpAffineExpression(
-			(available_lessons[key]["credit"], lesson_variables[key])
+			(lesson_variables[key], available_lessons[key]["credit"])
 			for key in lesson_variables
-			) >= 36
+			) <= 36
 	problem += pulp.LpAffineExpression(
-			(available_lessons[key]["love"], lesson_variables[key])
+			(lesson_variables[key], available_lessons[key]["love"])
 			for key in lesson_variables
-			) >= 20
+			) <= 180
 	problem += pulp.LpAffineExpression(
-			(available_lessons[key]["easy"], lesson_variables[key])
+			(lesson_variables[key], available_lessons[key]["easy"])
 			for key in lesson_variables
-			) >= 20
+			) <= 180
 	# config same time lesson restricted expression
-	overlap = utils.find_same_time_lesson(available_lessons)
-	print("Overlap lesson")
-	print(overlap)
-	for target in overlap:
-		for i in target:
-			print(available_lessons[i])
-		print("")
+	overlaps = utils.find_same_time_lesson(available_lessons)
+	for target in overlaps:
+		problem += pulp.lpSum(
+				lesson_variables[i] for i in target
+				) == 1
+	print("Problem")
+	print(problem)
+	# start solve problem
+	problem.solve()
+	for v in problem.variables():
+		print(available_lessons[v.name[2:].replace("_", "-")]["name"], '=', v.varValue)
+
+	print('obj = ', pulp.value(problem.objective))
+	
 	# TODO: use pulp to solve optimize solution for general lesson
 	# export result time table
 main()
