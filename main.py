@@ -210,13 +210,14 @@ def main():
 			print("{} - {}".format(grade, semester))
 			get_time_prefer_table(grade, semester, time_prefer_table["{}{}".format(grade, '+' if semester == 1 else '-')])
 			available_lessons.update(get_available_lesson(grade, semester, time_lesson_table["{}{}".format(grade, '+' if semester == 1 else '-')], 1))
-	print("Time Lesson Table")
-	print(time_lesson_table)
-	print("Time Prefer Table")
-	print(time_prefer_table)
-	print("All Avaliable Elective Lesson")
-	print(available_lessons)
-	# TODO: use pulp to solve optimize solution for elevtive lesson
+    #print("Time Lesson Table")
+	#print(time_lesson_table)
+	#print("Time Prefer Table")
+	#print(time_prefer_table)
+	#print("All Avaliable Elective Lesson")
+	#print(available_lessons)
+    
+    # TODO: use pulp to solve optimize solution for elevtive lesson
 	problem = pulp.LpProblem("Choosing Lesson", pulp.LpMaximize)
 	# define all available lessons to optimization variable
 	names = [key for key in available_lessons]
@@ -224,7 +225,7 @@ def main():
 
 	# config object expression
 	problem += pulp.lpSum(
-			[time_prefer_table["{}{}".format(available_lessons[key]["grade"], '+' if available_lessons[key]["semester"] == 1 else '-')][str(time["day"])][time["period"][0]] * ratio[0] * lesson_variables[key] for time in available_lessons[key]["time"]] + 
+			[time_prefer_table["{}{}".format(available_lessons[key]["grade"], '+' if available_lessons[key]["semester"] == 1 else '-')][str(time["day"])][time["period"][0]] / available_lessons[key]["credit"] * ratio[0] * lesson_variables[key] for time in available_lessons[key]["time"]] + 
 			available_lessons[key]["love"] * ratio[1] * lesson_variables[key] + 
 			available_lessons[key]["easy"] * ratio[2] * lesson_variables[key]
 			for key in lesson_variables
@@ -233,15 +234,15 @@ def main():
 	problem += pulp.LpAffineExpression(
 			(lesson_variables[key], available_lessons[key]["credit"])
 			for key in lesson_variables
-			) <= 36
+			) <= 37
 	problem += pulp.LpAffineExpression(
 			(lesson_variables[key], available_lessons[key]["love"])
 			for key in lesson_variables
-			) <= 180
+			) >= 60
 	problem += pulp.LpAffineExpression(
 			(lesson_variables[key], available_lessons[key]["easy"])
 			for key in lesson_variables
-			) <= 180
+			) >= 60
 	# config same time lesson restricted expression
 	overlaps = utils.find_same_time_lesson(available_lessons)
 	for target in overlaps:
