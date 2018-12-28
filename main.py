@@ -56,7 +56,7 @@ def get_available_lesson(grade, semester, time_table, lesson_type):
 		target_lesson = {
 			"type": lesson_type,
 			"grade": grade,
-			"semester": semester,
+			"semester": "+" if semester == 1 else "-",
 			"name": lesson[0].value,
 			"time": utils.parse_time(lesson[3].value),
 			"love": lesson[4].value,
@@ -225,7 +225,7 @@ def main():
 
 	# config object expression
 	problem += pulp.lpSum(
-			[time_prefer_table["{}{}".format(available_lessons[key]["grade"], '+' if available_lessons[key]["semester"] == 1 else '-')][str(time["day"])][time["period"][0]] / available_lessons[key]["credit"] * ratio[0] * lesson_variables[key] for time in available_lessons[key]["time"]] + 
+			[time_prefer_table["{}{}".format(available_lessons[key]["grade"], available_lessons[key]["semester"])][str(time["day"])][time["period"][0]] / available_lessons[key]["credit"] * ratio[0] * lesson_variables[key] for time in available_lessons[key]["time"]] + 
 			available_lessons[key]["love"] * ratio[1] * lesson_variables[key] + 
 			available_lessons[key]["easy"] * ratio[2] * lesson_variables[key]
 			for key in lesson_variables
