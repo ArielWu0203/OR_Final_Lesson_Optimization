@@ -298,12 +298,12 @@ def main(time,love,easy):
             "4-": []
             }
     # config start to pulp
-    for grade in range(1, 2):
-        for semester in range(1,2):
+    for grade in range(1, 5):
+        for semester in range(1,3):
             available_lessons = {}
             available_lessons.update(get_available_lesson(grade, semester, time_lesson_table["{}{}".format(grade, '+' if semester == 1 else '-')], 2))
             problem = pulp.LpProblem("Choosing Lesson", pulp.LpMaximize)
-                # define all available lessons to optimization variable
+            # define all available lessons to optimization variable
             names = [key for key in available_lessons]
             lesson_variables = pulp.LpVariable.dict('x', names, lowBound=0, cat="Binary")
             # config object expression
@@ -332,7 +332,7 @@ def main(time,love,easy):
                 problem += pulp.lpSum(
                     lesson_variables[i] for i in target
                     ) == 1
-            print("General lessons "+str(grade)+"-"+str(semester))
+            #print("General lessons "+str(grade)+"-"+str(semester))
             # start solve problem
             problem.solve()
             choose_lesson = []
@@ -361,7 +361,7 @@ def main(time,love,easy):
     
     print("score = ",score)
     print("total",score+score1)
-    return (score+score1)
+    return (score + score1)
 
 """
     # export table
@@ -438,7 +438,6 @@ def test() :
     print("ratio = ",max_ratio," Max obj = ",Max)
     print("ratio = ",min_ratio," Min obj = ",Min)
 
-#test()
 
 #search conditions
 def test2():
@@ -450,5 +449,5 @@ def test2():
         print("ratio = ",ratio[i]," obj  = ",score[i])
 
 test2()
-
+#test()
 #print("total obj = ",main(0.1,0.7,0.2))
