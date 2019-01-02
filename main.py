@@ -88,7 +88,7 @@ def main(time,love,easy):
 
     #define ratio
     ratio = [time,love,easy]
-
+    print("ratio = ",ratio)
     # define lesson table
     time_lesson_table = {
         "1+": {
@@ -211,7 +211,8 @@ def main(time,love,easy):
     }
 
     #define objective score
-    score = 0
+    score = 0.0
+    score1 = 0.0
 
     # define available lesson list
     available_lessons = {}
@@ -265,7 +266,8 @@ def main(time,love,easy):
         print(available_lessons[v.name[2:].replace("_", "-")]["name"], '=', v.varValue)
 
     print('obj = ', pulp.value(problem.objective))
-    score = score + pulp.value(problem.objective)
+    score1 = score1 + pulp.value(problem.objective)
+    print("score1 = ",score1)
 
     # add elective to time_lesson_table
     for v in problem.variables():
@@ -282,7 +284,6 @@ def main(time,love,easy):
             period = item['period']
             for i in period:
                     time_lesson_table[grade+semester][day][i] = available_lessons[v.name[2:].replace("_", "-")]["name"]
-    print(time_lesson_table)
 
 
     # define general lesson that chosen
@@ -297,8 +298,8 @@ def main(time,love,easy):
             "4-": []
             }
     # config start to pulp
-    for grade in range(1, 5):
-        for semester in range(1,3):
+    for grade in range(1, 2):
+        for semester in range(1,2):
             available_lessons = {}
             available_lessons.update(get_available_lesson(grade, semester, time_lesson_table["{}{}".format(grade, '+' if semester == 1 else '-')], 2))
             problem = pulp.LpProblem("Choosing Lesson", pulp.LpMaximize)
@@ -356,8 +357,11 @@ def main(time,love,easy):
                 print("{} - {} - value: {}".format(index + 1, target["name"], target["value"]))
 
             print('obj = ', pulp.value(problem.objective))
-            score += pulp.value(problem.objective)
-    return score
+            score =  score + pulp.value(problem.objective)
+    
+    print("score = ",score)
+    print("total",score+score1)
+    return (score+score1)
 
 """
     # export table
@@ -414,25 +418,24 @@ def main(time,love,easy):
 
 # search for Max & min obj
 def test() :
-    MAX = 0
-    Min = 10000000
-    max_ratio = [0,0,0]
-    min_ratio = [0,0,0]
+    Max = 0.0
+    Min = 10000000.0
+    max_ratio = [0.0,0.0,0.0]
+    min_ratio = [0.0,0.0,0.0]
 
     for time in range(0,11,1):
         for love in range(0,11-time,1) :
             easy = 10-time-love
             ratio = [time/10,love/10,easy/10]
-            print(ratio)
-            score = 0
+            score = 0.0
             score = main(ratio[0],ratio[1],ratio[2])
-            if score > MAX:
-                MAX = score
+            if score > Max:
+                Max = score
                 max_ratio = ratio
             if score < Min:
                 Min = score
                 min_ratio = ratio
-    print("ratio = ",max_ratio," Max obj = ",MAX)
+    print("ratio = ",max_ratio," Max obj = ",Max)
     print("ratio = ",min_ratio," Min obj = ",Min)
 
 #test()
@@ -440,13 +443,12 @@ def test() :
 #search conditions
 def test2():
     ratio = [[1.0,0.0,0.0],[0.0,1.0,0.0],[0.0,0.0,1.0],[0.5,0.5,0.0],[0.0,0.5,0.5],[0.5,0.0,0.5]]
-    score = [0,0,0,0,0,0]
+    score = [0.0,0.0,0.0,0.0,0.0,0.0]
     for i in range(0,6) :
         score[i] = main(ratio[i][0],ratio[i][1],ratio[i][2])
     for i in range(0,6) :
         print("ratio = ",ratio[i]," obj  = ",score[i])
 
-#test2()
+test2()
 
-score = main(0.1,0.7,0.2)
-print("total obj = ",score)
+#print("total obj = ",main(0.1,0.7,0.2))
