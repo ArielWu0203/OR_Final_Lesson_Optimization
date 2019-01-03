@@ -361,9 +361,7 @@ def main(time,love,easy):
     
     print("score = ",score)
     print("total",score+score1)
-    return (score + score1)
 
-"""
     # export table
     for grade in range(1, 5):
         for semester in ['+', '-']:
@@ -414,7 +412,8 @@ def main(time,love,easy):
             filename = "{}-{} general choose order".format(grade, 1 if semester == '+' else 2)
             plotly.offline.plot(data, auto_open=False, filename=(filename + ".html"), image_filename=filename, image_width=400, image_height=600, image="svg")
             print("{} plot success!!".format(filename))
-"""
+
+    return (score + score1)
 
 # search for Max & min obj
 def test() :
@@ -448,6 +447,6 @@ def test2():
     for i in range(0,6) :
         print("ratio = ",ratio[i]," obj  = ",score[i])
 
-test2()
+#test2()
 #test()
-#print("total obj = ",main(0.1,0.7,0.2))
+print("total obj = ",main(0.1,0.7,0.2))
